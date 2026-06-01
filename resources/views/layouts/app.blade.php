@@ -4,7 +4,7 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0">
     <meta name="csrf-token" content="{{ csrf_token() }}">
-    <title>@yield('title', 'সেলো ম্যানেজার') — {{ config('app.name') }}</title>
+    <title>@yield('title', 'শ্যালো ম্যানেজার') — {{ config('app.name') }}</title>
     <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/css/bootstrap.min.css">
     <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.11.3/font/bootstrap-icons.min.css">
     <link rel="preconnect" href="https://fonts.googleapis.com">
@@ -195,7 +195,7 @@
 {{-- Sidebar --}}
 <div class="sidebar" id="sidebar">
     <div class="brand">
-        <i class="bi bi-droplet-fill text-info me-2"></i> সেলো ম্যানেজার
+        <i class="bi bi-droplet-fill text-info me-2"></i> শ্যালো ম্যানেজার
     </div>
     <nav>
         <div class="nav-section">মূল মেনু</div>
@@ -203,7 +203,7 @@
             <i class="bi bi-speedometer2"></i> ড্যাশবোর্ড
         </a>
         <a href="{{ route('pump-owner.edit') }}" class="nav-link {{ request()->routeIs('pump-owner.*') ? 'active' : '' }}">
-            <i class="bi bi-person-gear"></i> সেলো মালিকের প্রোফাইল
+            <i class="bi bi-person-gear"></i> শ্যালো মালিকের প্রোফাইল
         </a>
 
         <div class="nav-section">ব্যবস্থাপনা</div>

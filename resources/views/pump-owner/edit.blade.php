@@ -1,9 +1,9 @@
 @extends('layouts.app')
-@section('title', 'সেলো মালিকের প্রোফাইল')
+@section('title', 'শ্যালো মালিকের প্রোফাইল')
 
 @section('content')
 <div class="d-flex justify-content-between align-items-center mb-4">
-    <h4 class="fw-bold mb-0">সেলো মালিকের প্রোফাইল</h4>
+    <h4 class="fw-bold mb-0">শ্যালো মালিকের প্রোফাইল</h4>
 </div>
 
 <div class="row justify-content-center">
@@ -29,9 +29,9 @@
                             @error('mobile')<div class="invalid-feedback">{{ $message }}</div>@enderror
                         </div>
                         <div class="col-md-6">
-                            <label class="form-label fw-semibold">সেলোর নাম / পরিচিতি</label>
+                            <label class="form-label fw-semibold">শ্যালোর নাম / পরিচিতি</label>
                             <input type="text" name="pump_name" class="form-control"
-                                   value="{{ old('pump_name', $owner->pump_name) }}" placeholder="যেমন: মিজান সেলো">
+                                   value="{{ old('pump_name', $owner->pump_name) }}" placeholder="যেমন: মিজান শ্যালো">
                         </div>
                         <div class="col-md-6">
                             <label class="form-label fw-semibold">গ্রাম</label>

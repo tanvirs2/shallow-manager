@@ -26,7 +26,7 @@
 </head>
 <body>
 <div class="header">
-    <h2>{{ optional($owner)->pump_name ?? 'সেলো সেচ ব্যবস্থাপনা' }}</h2>
+    <h2>{{ optional($owner)->pump_name ?? 'শ্যালো সেচ ব্যবস্থাপনা' }}</h2>
     @if($owner)
     <p>{{ $owner->village }}, {{ $owner->address }}</p>
     <p>মোবাইল: {{ $owner->mobile }}</p>

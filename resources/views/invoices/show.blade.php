@@ -20,7 +20,7 @@
             <div class="card-body p-4">
                 {{-- Header --}}
                 <div class="text-center border-bottom pb-3 mb-3">
-                    <h5 class="fw-bold mb-1">{{ optional($owner)->pump_name ?? 'সেলো ম্যানেজার' }}</h5>
+                    <h5 class="fw-bold mb-1">{{ optional($owner)->pump_name ?? 'শ্যালো ম্যানেজার' }}</h5>
                     @if($owner)
                     <div class="text-muted small">{{ $owner->village }}, {{ $owner->address }}</div>
                     <div class="small">মোবাইল: {{ $owner->mobile }}</div>
