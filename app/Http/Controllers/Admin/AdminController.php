@@ -87,7 +87,7 @@ class AdminController extends Controller
             'duration_value' => 'required|integer|min:1|max:999',
         ]);
 
-        $expiresAt = now()->{'add' . ucfirst($data['duration_type'])}($data['duration_value']);
+        $expiresAt = now()->{'add' . ucfirst($data['duration_type'])}((int) $data['duration_value']);
 
         $user = User::create([
             'name'       => $data['name'],
@@ -153,7 +153,7 @@ class AdminController extends Controller
             ? $user->expires_at->copy()
             : now();
 
-        $newExpiry = $base->{'add' . ucfirst($data['duration_type'])}($data['duration_value']);
+        $newExpiry = $base->{'add' . ucfirst($data['duration_type'])}((int) $data['duration_value']);
         $user->update(['expires_at' => $newExpiry]);
 
         return redirect()->route('admin.users.edit', $user)
