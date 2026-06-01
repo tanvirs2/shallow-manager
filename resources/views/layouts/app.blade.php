@@ -225,6 +225,17 @@
             <i class="bi bi-file-earmark-excel"></i> এক্সেল ইমপোর্ট
         </a>
     </nav>
+    <div class="p-3 border-top border-white border-opacity-10">
+        <div class="text-white-50 small mb-2">
+            <i class="bi bi-person-circle me-1"></i>{{ auth()->user()->name }}
+        </div>
+        <form action="{{ route('logout') }}" method="POST">
+            @csrf
+            <button type="submit" class="btn btn-outline-light btn-sm w-100">
+                <i class="bi bi-box-arrow-right me-1"></i>লগআউট
+            </button>
+        </form>
+    </div>
 </div>
 
 {{-- Main --}}

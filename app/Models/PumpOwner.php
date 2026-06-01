@@ -7,11 +7,16 @@ use Illuminate\Database\Eloquent\Model;
 class PumpOwner extends Model
 {
     protected $fillable = [
-        'name', 'mobile', 'pump_name', 'village', 'address',
+        'user_id', 'name', 'mobile', 'pump_name', 'village', 'address',
         'rate_per_hour', 'nid', 'notes',
     ];
 
     protected $casts = [
         'rate_per_hour' => 'decimal:2',
     ];
+
+    public function user()
+    {
+        return $this->belongsTo(User::class);
+    }
 }

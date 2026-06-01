@@ -11,6 +11,7 @@ class FarmerController extends Controller
     {
         $farmers = Farmer::withSum('waterEntries', 'total_amount')
             ->withSum('payments', 'amount')
+            ->where('user_id', auth()->id())
             ->when($request->search, fn($q) => $q->where('name', 'like', "%{$request->search}%")
                 ->orWhere('mobile', 'like', "%{$request->search}%")
                 ->orWhere('village', 'like', "%{$request->search}%"))
@@ -44,6 +45,7 @@ class FarmerController extends Controller
         ]);
 
         $data['is_active'] = $request->has('is_active');
+        $data['user_id']   = auth()->id();
 
         Farmer::create($data);
         return redirect()->route('farmers.index')->with('success', 'কৃষক সফলভাবে যোগ করা হয়েছে।');
@@ -51,17 +53,21 @@ class FarmerController extends Controller
 
     public function show(Farmer $farmer)
     {
+        $this->authorizeOwner($farmer);
         $farmer->load(['waterEntries' => fn($q) => $q->latest(), 'payments' => fn($q) => $q->latest()]);
         return view('farmers.show', compact('farmer'));
     }
 
     public function edit(Farmer $farmer)
     {
+        $this->authorizeOwner($farmer);
         return view('farmers.edit', compact('farmer'));
     }
 
     public function update(Request $request, Farmer $farmer)
     {
+        $this->authorizeOwner($farmer);
+
         $data = $request->validate([
             'name'             => 'required|string|max:255',
             'mobile'           => 'required|string|max:20',
@@ -83,7 +89,13 @@ class FarmerController extends Controller
 
     public function destroy(Farmer $farmer)
     {
+        $this->authorizeOwner($farmer);
         $farmer->delete();
         return redirect()->route('farmers.index')->with('success', 'কৃষক মুছে ফেলা হয়েছে।');
+    }
+
+    private function authorizeOwner(Farmer $farmer): void
+    {
+        abort_if($farmer->user_id !== auth()->id(), 403, 'এই তথ্য দেখার অনুমতি নেই।');
     }
 }

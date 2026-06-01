@@ -46,4 +46,14 @@ class User extends Authenticatable
             'password' => 'hashed',
         ];
     }
+
+    public function pumpOwner()
+    {
+        return $this->hasOne(PumpOwner::class);
+    }
+
+    public function farmers()
+    {
+        return $this->hasMany(Farmer::class);
+    }
 }

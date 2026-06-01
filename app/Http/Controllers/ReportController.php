@@ -12,16 +12,17 @@ class ReportController extends Controller
 {
     public function index(Request $request)
     {
-        $type = $request->type ?? 'monthly';
-        $year = $request->year ?? now()->year;
-        $month = $request->month ?? now()->month;
-        $season = $request->season;
+        $farmerIds = Farmer::where('user_id', auth()->id())->pluck('id');
+
+        $type     = $request->type ?? 'monthly';
+        $year     = $request->year ?? now()->year;
+        $month    = $request->month ?? now()->month;
+        $season   = $request->season;
         $farmerId = $request->farmer_id;
 
-        $entriesQuery = WaterEntry::with('farmer')
+        $entriesQuery  = WaterEntry::with('farmer')->whereIn('farmer_id', $farmerIds)
             ->when($farmerId, fn($q) => $q->where('farmer_id', $farmerId));
-
-        $paymentsQuery = Payment::with('farmer')
+        $paymentsQuery = Payment::with('farmer')->whereIn('farmer_id', $farmerIds)
             ->when($farmerId, fn($q) => $q->where('farmer_id', $farmerId));
 
         if ($type === 'daily') {
@@ -39,21 +40,19 @@ class ReportController extends Controller
             $label = "সিজন রিপোর্ট: $season";
         } else {
             $from = $request->from ?? now()->startOfYear()->toDateString();
-            $to = $request->to ?? now()->toDateString();
+            $to   = $request->to ?? now()->toDateString();
             $entriesQuery->whereBetween('supply_date', [$from, $to]);
             $paymentsQuery->whereBetween('payment_date', [$from, $to]);
             $label = "কাস্টম রিপোর্ট: $from — $to";
         }
 
-        $entries = $entriesQuery->latest('supply_date')->get();
-        $payments = $paymentsQuery->latest('payment_date')->get();
-
+        $entries    = $entriesQuery->latest('supply_date')->get();
+        $payments   = $paymentsQuery->latest('payment_date')->get();
         $totalBilled = $entries->sum('total_amount');
-        $totalPaid = $payments->sum('amount');
-        $totalDue = $totalBilled - $totalPaid;
+        $totalPaid  = $payments->sum('amount');
+        $totalDue   = $totalBilled - $totalPaid;
         $totalHours = $entries->sum('hours');
-
-        $farmers = Farmer::orderBy('name')->get();
+        $farmers    = Farmer::where('user_id', auth()->id())->orderBy('name')->get();
 
         return view('reports.index', compact(
             'entries', 'payments', 'totalBilled', 'totalPaid', 'totalDue',

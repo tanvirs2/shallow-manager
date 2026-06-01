@@ -9,9 +9,22 @@ use Illuminate\Http\Request;
 
 class WaterEntryController extends Controller
 {
+    private function userFarmerIds()
+    {
+        return Farmer::where('user_id', auth()->id())->pluck('id');
+    }
+
+    private function authorizeEntry(WaterEntry $entry): void
+    {
+        abort_if(!$this->userFarmerIds()->contains($entry->farmer_id), 403, 'এই তথ্য দেখার অনুমতি নেই।');
+    }
+
     public function index(Request $request)
     {
+        $farmerIds = $this->userFarmerIds();
+
         $entries = WaterEntry::with('farmer')
+            ->whereIn('farmer_id', $farmerIds)
             ->when($request->farmer_id, fn($q) => $q->where('farmer_id', $request->farmer_id))
             ->when($request->from, fn($q) => $q->whereDate('supply_date', '>=', $request->from))
             ->when($request->to, fn($q) => $q->whereDate('supply_date', '<=', $request->to))
@@ -20,28 +33,31 @@ class WaterEntryController extends Controller
             ->paginate(20)
             ->withQueryString();
 
-        $farmers = Farmer::where('is_active', true)->orderBy('name')->get();
+        $farmers = Farmer::where('user_id', auth()->id())->orderBy('name')->get();
 
         return view('water-entries.index', compact('entries', 'farmers'));
     }
 
     public function create()
     {
-        $farmers = Farmer::where('is_active', true)->orderBy('name')->get();
-        $defaultRate = optional(PumpOwner::first())->rate_per_hour ?? 0;
+        $farmers = Farmer::where('user_id', auth()->id())->orderBy('name')->get();
+        $defaultRate = optional(PumpOwner::where('user_id', auth()->id())->first())->rate_per_hour ?? 0;
         return view('water-entries.create', compact('farmers', 'defaultRate'));
     }
 
     public function store(Request $request)
     {
         $data = $request->validate([
-            'farmer_id'    => 'required|exists:farmers,id',
-            'supply_date'  => 'required|date',
-            'hours'        => 'required|numeric|min:0.5',
-            'rate_per_hour'=> 'required|numeric|min:0',
-            'season'       => 'nullable|string|max:50',
-            'notes'        => 'nullable|string',
+            'farmer_id'     => 'required|exists:farmers,id',
+            'supply_date'   => 'required|date',
+            'hours'         => 'required|numeric|min:0.5',
+            'rate_per_hour' => 'required|numeric|min:0',
+            'season'        => 'nullable|string|max:50',
+            'notes'         => 'nullable|string',
         ]);
+
+        // Ensure farmer belongs to this user
+        abort_if(!$this->userFarmerIds()->contains($data['farmer_id']), 403);
 
         WaterEntry::create($data);
         return redirect()->route('water-entries.index')->with('success', 'পানি সরবরাহ এন্ট্রি যোগ করা হয়েছে।');
@@ -49,25 +65,29 @@ class WaterEntryController extends Controller
 
     public function show(WaterEntry $waterEntry)
     {
+        $this->authorizeEntry($waterEntry);
         $waterEntry->load(['farmer', 'payments']);
         return view('water-entries.show', compact('waterEntry'));
     }
 
     public function edit(WaterEntry $waterEntry)
     {
-        $farmers = Farmer::where('is_active', true)->orderBy('name')->get();
+        $this->authorizeEntry($waterEntry);
+        $farmers = Farmer::where('user_id', auth()->id())->orderBy('name')->get();
         return view('water-entries.edit', compact('waterEntry', 'farmers'));
     }
 
     public function update(Request $request, WaterEntry $waterEntry)
     {
+        $this->authorizeEntry($waterEntry);
+
         $data = $request->validate([
-            'farmer_id'    => 'required|exists:farmers,id',
-            'supply_date'  => 'required|date',
-            'hours'        => 'required|numeric|min:0.5',
-            'rate_per_hour'=> 'required|numeric|min:0',
-            'season'       => 'nullable|string|max:50',
-            'notes'        => 'nullable|string',
+            'farmer_id'     => 'required|exists:farmers,id',
+            'supply_date'   => 'required|date',
+            'hours'         => 'required|numeric|min:0.5',
+            'rate_per_hour' => 'required|numeric|min:0',
+            'season'        => 'nullable|string|max:50',
+            'notes'         => 'nullable|string',
         ]);
 
         $waterEntry->update($data);
@@ -76,6 +96,7 @@ class WaterEntryController extends Controller
 
     public function destroy(WaterEntry $waterEntry)
     {
+        $this->authorizeEntry($waterEntry);
         $waterEntry->delete();
         return redirect()->route('water-entries.index')->with('success', 'এন্ট্রি মুছে ফেলা হয়েছে।');
     }

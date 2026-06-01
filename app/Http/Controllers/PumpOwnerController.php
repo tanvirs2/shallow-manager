@@ -9,7 +9,7 @@ class PumpOwnerController extends Controller
 {
     public function edit()
     {
-        $owner = PumpOwner::first() ?? new PumpOwner();
+        $owner = PumpOwner::where('user_id', auth()->id())->first() ?? new PumpOwner();
         return view('pump-owner.edit', compact('owner'));
     }
 
@@ -26,10 +26,11 @@ class PumpOwnerController extends Controller
             'notes'         => 'nullable|string',
         ]);
 
-        $owner = PumpOwner::first();
+        $owner = PumpOwner::where('user_id', auth()->id())->first();
         if ($owner) {
             $owner->update($data);
         } else {
+            $data['user_id'] = auth()->id();
             PumpOwner::create($data);
         }
 

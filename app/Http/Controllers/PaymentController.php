@@ -9,9 +9,17 @@ use Illuminate\Http\Request;
 
 class PaymentController extends Controller
 {
+    private function userFarmerIds()
+    {
+        return Farmer::where('user_id', auth()->id())->pluck('id');
+    }
+
     public function index(Request $request)
     {
+        $farmerIds = $this->userFarmerIds();
+
         $payments = Payment::with(['farmer', 'waterEntry'])
+            ->whereIn('farmer_id', $farmerIds)
             ->when($request->farmer_id, fn($q) => $q->where('farmer_id', $request->farmer_id))
             ->when($request->from, fn($q) => $q->whereDate('payment_date', '>=', $request->from))
             ->when($request->to, fn($q) => $q->whereDate('payment_date', '<=', $request->to))
@@ -19,8 +27,9 @@ class PaymentController extends Controller
             ->paginate(20)
             ->withQueryString();
 
-        $farmers = Farmer::orderBy('name')->get();
-        $totalAmount = Payment::when($request->farmer_id, fn($q) => $q->where('farmer_id', $request->farmer_id))
+        $farmers = Farmer::where('user_id', auth()->id())->orderBy('name')->get();
+        $totalAmount = Payment::whereIn('farmer_id', $farmerIds)
+            ->when($request->farmer_id, fn($q) => $q->where('farmer_id', $request->farmer_id))
             ->when($request->from, fn($q) => $q->whereDate('payment_date', '>=', $request->from))
             ->when($request->to, fn($q) => $q->whereDate('payment_date', '<=', $request->to))
             ->sum('amount');
@@ -30,11 +39,18 @@ class PaymentController extends Controller
 
     public function create(Request $request)
     {
-        $farmers = Farmer::where('is_active', true)->orderBy('name')->get();
-        $selectedFarmer = $request->farmer_id ? Farmer::with('waterEntries')->find($request->farmer_id) : null;
-        $dueEntries = $selectedFarmer
-            ? $selectedFarmer->waterEntries->filter(fn($e) => $e->due_amount > 0)
-            : collect();
+        $farmers = Farmer::where('user_id', auth()->id())->orderBy('name')->get();
+        $selectedFarmer = null;
+        $dueEntries = collect();
+
+        if ($request->farmer_id) {
+            $selectedFarmer = Farmer::where('user_id', auth()->id())
+                ->with('waterEntries')
+                ->find($request->farmer_id);
+            if ($selectedFarmer) {
+                $dueEntries = $selectedFarmer->waterEntries->filter(fn($e) => $e->due_amount > 0);
+            }
+        }
 
         return view('payments.create', compact('farmers', 'selectedFarmer', 'dueEntries'));
     }
@@ -51,19 +67,25 @@ class PaymentController extends Controller
             'notes'          => 'nullable|string',
         ]);
 
+        abort_if(!$this->userFarmerIds()->contains($data['farmer_id']), 403);
+
         Payment::create($data);
         return redirect()->route('payments.index')->with('success', 'পেমেন্ট সফলভাবে রেকর্ড করা হয়েছে।');
     }
 
     public function destroy(Payment $payment)
     {
+        abort_if(!$this->userFarmerIds()->contains($payment->farmer_id), 403);
         $payment->delete();
         return redirect()->route('payments.index')->with('success', 'পেমেন্ট মুছে ফেলা হয়েছে।');
     }
 
     public function farmerDue(Request $request)
     {
-        $farmer = Farmer::with('waterEntries')->findOrFail($request->farmer_id);
+        $farmer = Farmer::where('user_id', auth()->id())
+            ->with('waterEntries')
+            ->findOrFail($request->farmer_id);
+
         $dueEntries = $farmer->waterEntries->filter(fn($e) => $e->due_amount > 0)
             ->map(fn($e) => [
                 'id'         => $e->id,

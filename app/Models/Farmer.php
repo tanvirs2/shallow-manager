@@ -7,7 +7,7 @@ use Illuminate\Database\Eloquent\Model;
 class Farmer extends Model
 {
     protected $fillable = [
-        'name', 'mobile', 'village', 'union', 'upazila',
+        'user_id', 'name', 'mobile', 'village', 'union', 'upazila',
         'land_area', 'land_unit', 'land_description',
         'nid', 'is_active', 'notes',
     ];
@@ -16,6 +16,11 @@ class Farmer extends Model
         'land_area' => 'decimal:3',
         'is_active' => 'boolean',
     ];
+
+    public function user()
+    {
+        return $this->belongsTo(User::class);
+    }
 
     public function waterEntries()
     {

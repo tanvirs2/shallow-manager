@@ -6,22 +6,34 @@ use App\Models\Farmer;
 use App\Models\PumpOwner;
 use App\Models\WaterEntry;
 use Barryvdh\DomPDF\Facade\Pdf;
-use Carbon\Carbon;
 use Illuminate\Http\Request;
 
 class InvoiceController extends Controller
 {
+    private function userOwner()
+    {
+        return PumpOwner::where('user_id', auth()->id())->first();
+    }
+
+    private function authorizeEntry(WaterEntry $entry): void
+    {
+        $farmerIds = Farmer::where('user_id', auth()->id())->pluck('id');
+        abort_if(!$farmerIds->contains($entry->farmer_id), 403);
+    }
+
     public function show(WaterEntry $waterEntry)
     {
+        $this->authorizeEntry($waterEntry);
         $waterEntry->load(['farmer', 'payments']);
-        $owner = PumpOwner::first();
+        $owner = $this->userOwner();
         return view('invoices.show', compact('waterEntry', 'owner'));
     }
 
     public function pdf(WaterEntry $waterEntry)
     {
+        $this->authorizeEntry($waterEntry);
         $waterEntry->load(['farmer', 'payments']);
-        $owner = PumpOwner::first();
+        $owner = $this->userOwner();
 
         $pdf = Pdf::loadView('invoices.pdf', compact('waterEntry', 'owner'))
             ->setPaper('a5', 'portrait');
@@ -32,8 +44,10 @@ class InvoiceController extends Controller
 
     public function farmerBill(Request $request, Farmer $farmer)
     {
+        abort_if($farmer->user_id !== auth()->id(), 403);
+
         $month = $request->month ?? now()->month;
-        $year = $request->year ?? now()->year;
+        $year  = $request->year ?? now()->year;
 
         $entries = $farmer->waterEntries()
             ->whereYear('supply_date', $year)
@@ -42,10 +56,10 @@ class InvoiceController extends Controller
             ->latest('supply_date')
             ->get();
 
-        $owner = PumpOwner::first();
+        $owner      = $this->userOwner();
         $totalBilled = $entries->sum('total_amount');
-        $totalPaid = $farmer->payments()->whereYear('payment_date', $year)->whereMonth('payment_date', $month)->sum('amount');
-        $totalDue = $totalBilled - $totalPaid;
+        $totalPaid  = $farmer->payments()->whereYear('payment_date', $year)->whereMonth('payment_date', $month)->sum('amount');
+        $totalDue   = $totalBilled - $totalPaid;
 
         $pdf = Pdf::loadView('invoices.farmer-bill', compact(
             'farmer', 'entries', 'owner', 'totalBilled', 'totalPaid', 'totalDue', 'month', 'year'

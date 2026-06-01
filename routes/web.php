@@ -1,5 +1,6 @@
 <?php
 
+use App\Http\Controllers\Auth\LoginController;
 use App\Http\Controllers\DashboardController;
 use App\Http\Controllers\FarmerController;
 use App\Http\Controllers\ImportController;
@@ -10,28 +11,38 @@ use App\Http\Controllers\ReportController;
 use App\Http\Controllers\WaterEntryController;
 use Illuminate\Support\Facades\Route;
 
-Route::get('/', [DashboardController::class, 'index'])->name('dashboard');
+// Auth routes (no middleware)
+Route::get('/login', [LoginController::class, 'showLogin'])->name('login');
+Route::post('/login', [LoginController::class, 'login']);
+Route::post('/logout', [LoginController::class, 'logout'])->name('logout');
 
-Route::get('/profile', [PumpOwnerController::class, 'edit'])->name('pump-owner.edit');
-Route::put('/profile', [PumpOwnerController::class, 'update'])->name('pump-owner.update');
+// Protected routes
+Route::middleware('auth')->group(function () {
 
-Route::resource('farmers', FarmerController::class);
+    Route::get('/', [DashboardController::class, 'index'])->name('dashboard');
 
-Route::resource('water-entries', WaterEntryController::class);
+    Route::get('/profile', [PumpOwnerController::class, 'edit'])->name('pump-owner.edit');
+    Route::put('/profile', [PumpOwnerController::class, 'update'])->name('pump-owner.update');
 
-Route::get('/payments', [PaymentController::class, 'index'])->name('payments.index');
-Route::get('/payments/farmer-due', [PaymentController::class, 'farmerDue'])->name('payments.farmer-due');
-Route::get('/payments/create', [PaymentController::class, 'create'])->name('payments.create');
-Route::post('/payments', [PaymentController::class, 'store'])->name('payments.store');
-Route::delete('/payments/{payment}', [PaymentController::class, 'destroy'])->name('payments.destroy');
+    Route::resource('farmers', FarmerController::class);
 
-Route::get('/reports', [ReportController::class, 'index'])->name('reports.index');
+    Route::resource('water-entries', WaterEntryController::class);
 
-Route::get('/invoices/{waterEntry}', [InvoiceController::class, 'show'])->name('invoices.show');
-Route::get('/invoices/{waterEntry}/pdf', [InvoiceController::class, 'pdf'])->name('invoices.pdf');
-Route::get('/farmers/{farmer}/bill', [InvoiceController::class, 'farmerBill'])->name('invoices.farmer-bill');
+    Route::get('/payments', [PaymentController::class, 'index'])->name('payments.index');
+    Route::get('/payments/farmer-due', [PaymentController::class, 'farmerDue'])->name('payments.farmer-due');
+    Route::get('/payments/create', [PaymentController::class, 'create'])->name('payments.create');
+    Route::post('/payments', [PaymentController::class, 'store'])->name('payments.store');
+    Route::delete('/payments/{payment}', [PaymentController::class, 'destroy'])->name('payments.destroy');
 
-Route::get('/import', [ImportController::class, 'index'])->name('import.index');
-Route::post('/import/farmers', [ImportController::class, 'farmers'])->name('import.farmers');
-Route::post('/import/water-entries', [ImportController::class, 'waterEntries'])->name('import.water-entries');
-Route::get('/import/template/{type}', [ImportController::class, 'template'])->name('import.template');
+    Route::get('/reports', [ReportController::class, 'index'])->name('reports.index');
+
+    Route::get('/invoices/{waterEntry}', [InvoiceController::class, 'show'])->name('invoices.show');
+    Route::get('/invoices/{waterEntry}/pdf', [InvoiceController::class, 'pdf'])->name('invoices.pdf');
+    Route::get('/farmers/{farmer}/bill', [InvoiceController::class, 'farmerBill'])->name('invoices.farmer-bill');
+
+    Route::get('/import', [ImportController::class, 'index'])->name('import.index');
+    Route::post('/import/farmers', [ImportController::class, 'farmers'])->name('import.farmers');
+    Route::post('/import/water-entries', [ImportController::class, 'waterEntries'])->name('import.water-entries');
+    Route::get('/import/template/{type}', [ImportController::class, 'template'])->name('import.template');
+
+});
