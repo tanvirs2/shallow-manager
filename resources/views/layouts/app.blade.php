@@ -226,9 +226,34 @@
         </a>
     </nav>
     <div class="p-3 border-top border-white border-opacity-10">
-        <div class="text-white-50 small mb-2">
+        <div class="text-white-50 small mb-1">
             <i class="bi bi-person-circle me-1"></i>{{ auth()->user()->name }}
         </div>
+        @if(!auth()->user()->is_admin)
+            @php $days = auth()->user()->daysRemaining(); @endphp
+            @if($days <= 7)
+                <div class="mb-2">
+                    <span class="badge bg-danger w-100 py-1">
+                        <i class="bi bi-exclamation-triangle me-1"></i>
+                        {{ $days }} দিন বাকি!
+                    </span>
+                </div>
+            @elseif($days <= 30)
+                <div class="mb-2">
+                    <span class="badge bg-warning text-dark w-100 py-1">
+                        <i class="bi bi-clock me-1"></i>{{ $days }} দিন বাকি
+                    </span>
+                </div>
+            @else
+                <div class="text-white-50 mb-2" style="font-size:.7rem;">
+                    <i class="bi bi-clock me-1"></i>মেয়াদ: {{ auth()->user()->expires_at->format('d/m/Y') }}
+                </div>
+            @endif
+        @else
+            <div class="text-white-50 mb-2" style="font-size:.7rem;">
+                <i class="bi bi-shield-check me-1"></i>Admin
+            </div>
+        @endif
         <form action="{{ route('logout') }}" method="POST">
             @csrf
             <button type="submit" class="btn btn-outline-light btn-sm w-100">

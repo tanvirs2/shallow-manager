@@ -22,6 +22,8 @@ class User extends Authenticatable
         'name',
         'email',
         'password',
+        'expires_at',
+        'is_admin',
     ];
 
     /**
@@ -43,8 +45,26 @@ class User extends Authenticatable
     {
         return [
             'email_verified_at' => 'datetime',
-            'password' => 'hashed',
+            'expires_at'        => 'datetime',
+            'is_admin'          => 'boolean',
+            'password'          => 'hashed',
         ];
+    }
+
+    /** Admin হলে সবসময় active, না হলে expires_at চেক করো */
+    public function isActive(): bool
+    {
+        if ($this->is_admin) return true;
+        if (is_null($this->expires_at)) return false;
+        return $this->expires_at->isFuture();
+    }
+
+    /** কতদিন বাকি */
+    public function daysRemaining(): int
+    {
+        if ($this->is_admin) return 9999;
+        if (is_null($this->expires_at)) return 0;
+        return max(0, (int) now()->diffInDays($this->expires_at, false));
     }
 
     public function pumpOwner()
