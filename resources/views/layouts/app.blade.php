@@ -224,6 +224,15 @@
         <a href="{{ route('import.index') }}" class="nav-link {{ request()->routeIs('import.*') ? 'active' : '' }}">
             <i class="bi bi-file-earmark-excel"></i> এক্সেল ইমপোর্ট
         </a>
+
+        @if(auth()->user()->is_admin)
+        <div class="nav-section">অ্যাডমিন</div>
+        <a href="{{ route('admin.dashboard') }}" class="nav-link {{ request()->routeIs('admin.*') ? 'active' : '' }}"
+           style="background:rgba(99,102,241,.15);border:1px solid rgba(99,102,241,.25);">
+            <i class="bi bi-shield-lock-fill" style="color:#a5b4fc;"></i>
+            <span style="color:#a5b4fc;">অ্যাডমিন প্যানেল</span>
+        </a>
+        @endif
     </nav>
     <div class="p-3 border-top border-white border-opacity-10">
         <div class="text-white-50 small mb-1">

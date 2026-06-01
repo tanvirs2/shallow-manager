@@ -1,5 +1,6 @@
 <?php
 
+use App\Http\Controllers\Admin\AdminController;
 use App\Http\Controllers\Auth\LoginController;
 use App\Http\Controllers\DashboardController;
 use App\Http\Controllers\FarmerController;
@@ -11,7 +12,20 @@ use App\Http\Controllers\ReportController;
 use App\Http\Controllers\WaterEntryController;
 use Illuminate\Support\Facades\Route;
 
-// Auth routes (no middleware)
+// ── Admin Panel ──────────────────────────────────────────────────────────────
+Route::middleware(['auth', 'admin'])->prefix('admin')->name('admin.')->group(function () {
+    Route::get('/',                                   [AdminController::class, 'index'])->name('dashboard');
+    Route::get('/users',                              [AdminController::class, 'users'])->name('users');
+    Route::get('/users/create',                       [AdminController::class, 'createUser'])->name('users.create');
+    Route::post('/users',                             [AdminController::class, 'storeUser'])->name('users.store');
+    Route::get('/users/{user}/edit',                  [AdminController::class, 'editUser'])->name('users.edit');
+    Route::put('/users/{user}',                       [AdminController::class, 'updateUser'])->name('users.update');
+    Route::post('/users/{user}/grant',                [AdminController::class, 'grantAccess'])->name('users.grant');
+    Route::post('/users/{user}/revoke',               [AdminController::class, 'revokeAccess'])->name('users.revoke');
+    Route::delete('/users/{user}',                    [AdminController::class, 'deleteUser'])->name('users.delete');
+});
+
+// ── Auth routes (no middleware) ───────────────────────────────────────────────
 Route::get('/login', [LoginController::class, 'showLogin'])->name('login');
 Route::post('/login', [LoginController::class, 'login']);
 Route::post('/logout', [LoginController::class, 'logout'])->name('logout');
