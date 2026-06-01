@@ -1,6 +1,7 @@
 <?php
 
 use App\Http\Controllers\Admin\AdminController;
+use App\Http\Controllers\Admin\AdminLoginController;
 use App\Http\Controllers\Auth\LoginController;
 use App\Http\Controllers\DashboardController;
 use App\Http\Controllers\FarmerController;
@@ -12,8 +13,13 @@ use App\Http\Controllers\ReportController;
 use App\Http\Controllers\WaterEntryController;
 use Illuminate\Support\Facades\Route;
 
-// ── Admin Panel ──────────────────────────────────────────────────────────────
-Route::middleware(['auth', 'admin'])->prefix('admin')->name('admin.')->group(function () {
+// ── Admin Login (no middleware) ───────────────────────────────────────────────
+Route::get('/admin-login',  [AdminLoginController::class, 'showLogin'])->name('admin.login');
+Route::post('/admin-login', [AdminLoginController::class, 'login'])->name('admin.login.post');
+Route::post('/admin-logout',[AdminLoginController::class, 'logout'])->name('admin.logout');
+
+// ── Admin Panel (admin middleware handles auth + is_admin check) ──────────────
+Route::middleware(['admin'])->prefix('admin')->name('admin.')->group(function () {
     Route::get('/',                                   [AdminController::class, 'index'])->name('dashboard');
     Route::get('/users',                              [AdminController::class, 'users'])->name('users');
     Route::get('/users/create',                       [AdminController::class, 'createUser'])->name('users.create');

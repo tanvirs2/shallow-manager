@@ -10,7 +10,11 @@ class CheckAdmin
 {
     public function handle(Request $request, Closure $next): Response
     {
-        if (!auth()->check() || !auth()->user()->is_admin) {
+        if (!auth()->check()) {
+            return redirect()->route('admin.login');
+        }
+
+        if (!auth()->user()->is_admin) {
             abort(403, 'শুধুমাত্র Admin প্যানেলে প্রবেশ করতে পারবেন।');
         }
 

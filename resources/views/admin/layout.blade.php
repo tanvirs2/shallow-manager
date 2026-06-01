@@ -191,7 +191,7 @@
                 <div style="font-size:.68rem;color:rgba(255,255,255,.4);">Super Admin</div>
             </div>
         </div>
-        <form action="{{ route('logout') }}" method="POST">
+        <form action="{{ route('admin.logout') }}" method="POST">
             @csrf
             <button class="btn btn-sm w-100" style="background:rgba(255,255,255,.07);color:rgba(255,255,255,.7);font-size:.8rem;">
                 <i class="bi bi-box-arrow-right me-1"></i>লগআউট
