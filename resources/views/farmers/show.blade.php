@@ -4,11 +4,16 @@
 @section('content')
 <div class="d-flex justify-content-between align-items-center mb-4">
     <h4 class="fw-bold mb-0">{{ $farmer->name }}</h4>
-    <div class="d-flex gap-2">
+    <div class="d-flex gap-2 flex-wrap">
         <a href="{{ route('farmers.edit', $farmer) }}" class="btn btn-outline-warning btn-sm"><i class="bi bi-pencil me-1"></i>এডিট</a>
         <a href="{{ route('payments.create', ['farmer_id' => $farmer->id]) }}" class="btn btn-success btn-sm"><i class="bi bi-cash me-1"></i>পেমেন্ট নিন</a>
-        <a href="{{ route('invoices.farmer-bill', $farmer) }}" class="btn btn-outline-danger btn-sm"><i class="bi bi-file-pdf me-1"></i>বিল PDF</a>
+        <a href="{{ route('invoices.farmer-bill', $farmer) }}" class="btn btn-outline-secondary btn-sm"><i class="bi bi-file-pdf me-1"></i>বিল PDF</a>
         <a href="{{ route('farmers.index') }}" class="btn btn-outline-secondary btn-sm"><i class="bi bi-arrow-left"></i></a>
+        <form action="{{ route('farmers.destroy', $farmer) }}" method="POST"
+              onsubmit="return confirm('{{ $farmer->name }} কে মুছে ফেলবেন? সব এন্ট্রি ও পেমেন্ট তথ্যও মুছে যাবে!')">
+            @csrf @method('DELETE')
+            <button class="btn btn-danger btn-sm"><i class="bi bi-trash me-1"></i>মুছুন</button>
+        </form>
     </div>
 </div>
 

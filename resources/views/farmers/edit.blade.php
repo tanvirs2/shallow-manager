@@ -11,6 +11,15 @@
     <div class="col-md-8">
         <div class="card shadow-sm">
             <div class="card-body">
+                @if($errors->any())
+                <div class="alert alert-danger py-2 mb-3">
+                    <ul class="mb-0 ps-3">
+                        @foreach($errors->all() as $error)
+                            <li>{{ $error }}</li>
+                        @endforeach
+                    </ul>
+                </div>
+                @endif
                 <form action="{{ route('farmers.update', $farmer) }}" method="POST">
                     @csrf @method('PUT')
                     @include('farmers._form')

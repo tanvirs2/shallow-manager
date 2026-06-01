@@ -13,6 +13,15 @@
             <div class="card-body">
                 <form action="{{ route('farmers.store') }}" method="POST">
                     @csrf
+                    @if($errors->any())
+                    <div class="alert alert-danger py-2 mb-3">
+                        <ul class="mb-0 ps-3">
+                            @foreach($errors->all() as $error)
+                                <li>{{ $error }}</li>
+                            @endforeach
+                        </ul>
+                    </div>
+                    @endif
                     @include('farmers._form')
                     <div class="mt-4 d-flex gap-2">
                         <button type="submit" class="btn btn-primary"><i class="bi bi-save me-1"></i>সংরক্ষণ করুন</button>

@@ -50,9 +50,14 @@
                     <td>{{ $farmer->mobile }}</td>
                     <td>{{ $farmer->village ?? '—' }}</td>
                     <td>{{ $farmer->land_area }} {{ $farmer->land_unit }}</td>
-                    <td>৳{{ number_format($farmer->total_billed, 0) }}</td>
-                    <td>৳{{ number_format($farmer->total_paid, 0) }}</td>
-                    <td class="{{ $farmer->total_due > 0 ? 'text-danger fw-bold' : 'text-success' }}">৳{{ number_format($farmer->total_due, 0) }}</td>
+                    @php
+                        $billed = (float)($farmer->water_entries_sum_total_amount ?? 0);
+                        $paid   = (float)($farmer->payments_sum_amount ?? 0);
+                        $due    = $billed - $paid;
+                    @endphp
+                    <td>৳{{ number_format($billed, 0) }}</td>
+                    <td>৳{{ number_format($paid, 0) }}</td>
+                    <td class="{{ $due > 0 ? 'text-danger fw-bold' : 'text-success' }}">৳{{ number_format($due, 0) }}</td>
                     <td>
                         @if($farmer->is_active)
                             <span class="badge bg-success-subtle text-success">সক্রিয়</span>
@@ -97,23 +102,28 @@
                     <span class="badge bg-secondary-subtle text-secondary">নিষ্ক্রিয়</span>
                 @endif
             </div>
+            @php
+                $billed = (float)($farmer->water_entries_sum_total_amount ?? 0);
+                $paid   = (float)($farmer->payments_sum_amount ?? 0);
+                $due    = $billed - $paid;
+            @endphp
             <div class="row g-1 text-center mb-2" style="font-size:.8rem;">
                 <div class="col-4">
                     <div class="bg-light rounded p-1">
                         <div class="text-muted" style="font-size:.65rem;">বিল</div>
-                        <div class="fw-semibold">৳{{ number_format($farmer->total_billed, 0) }}</div>
+                        <div class="fw-semibold">৳{{ number_format($billed, 0) }}</div>
                     </div>
                 </div>
                 <div class="col-4">
                     <div class="bg-light rounded p-1">
                         <div class="text-muted" style="font-size:.65rem;">দেওয়া</div>
-                        <div class="fw-semibold text-success">৳{{ number_format($farmer->total_paid, 0) }}</div>
+                        <div class="fw-semibold text-success">৳{{ number_format($paid, 0) }}</div>
                     </div>
                 </div>
                 <div class="col-4">
-                    <div class="{{ $farmer->total_due > 0 ? 'bg-danger bg-opacity-10' : 'bg-success bg-opacity-10' }} rounded p-1">
+                    <div class="{{ $due > 0 ? 'bg-danger bg-opacity-10' : 'bg-success bg-opacity-10' }} rounded p-1">
                         <div class="text-muted" style="font-size:.65rem;">বাকি</div>
-                        <div class="fw-semibold {{ $farmer->total_due > 0 ? 'text-danger' : 'text-success' }}">৳{{ number_format($farmer->total_due, 0) }}</div>
+                        <div class="fw-semibold {{ $due > 0 ? 'text-danger' : 'text-success' }}">৳{{ number_format($due, 0) }}</div>
                     </div>
                 </div>
             </div>

@@ -9,7 +9,9 @@ class FarmerController extends Controller
 {
     public function index(Request $request)
     {
-        $farmers = Farmer::when($request->search, fn($q) => $q->where('name', 'like', "%{$request->search}%")
+        $farmers = Farmer::withSum('waterEntries', 'total_amount')
+            ->withSum('payments', 'amount')
+            ->when($request->search, fn($q) => $q->where('name', 'like', "%{$request->search}%")
                 ->orWhere('mobile', 'like', "%{$request->search}%")
                 ->orWhere('village', 'like', "%{$request->search}%"))
             ->when($request->status === 'active', fn($q) => $q->where('is_active', true))
@@ -38,7 +40,6 @@ class FarmerController extends Controller
             'land_unit'        => 'required|in:acre,shotok,bigha',
             'land_description' => 'nullable|string',
             'nid'              => 'nullable|string|max:30',
-            'is_active'        => 'boolean',
             'notes'            => 'nullable|string',
         ]);
 

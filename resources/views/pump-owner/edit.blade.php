@@ -13,6 +13,15 @@
                 <i class="bi bi-person-gear me-2"></i>প্রোফাইল তথ্য
             </div>
             <div class="card-body">
+                @if($errors->any())
+                <div class="alert alert-danger py-2 mb-3">
+                    <ul class="mb-0 ps-3">
+                        @foreach($errors->all() as $error)
+                            <li>{{ $error }}</li>
+                        @endforeach
+                    </ul>
+                </div>
+                @endif
                 <form action="{{ route('pump-owner.update') }}" method="POST">
                     @csrf @method('PUT')
                     <div class="row g-3">
