@@ -1,0 +1,26 @@
+@extends('layouts.app')
+@section('title', 'নতুন পানি সরবরাহ এন্ট্রি')
+
+@section('content')
+<div class="d-flex justify-content-between align-items-center mb-4">
+    <h4 class="fw-bold mb-0">নতুন পানি সরবরাহ এন্ট্রি</h4>
+    <a href="{{ route('water-entries.index') }}" class="btn btn-outline-secondary"><i class="bi bi-arrow-left me-1"></i>ফিরে যান</a>
+</div>
+
+<div class="row justify-content-center">
+    <div class="col-md-7">
+        <div class="card shadow-sm">
+            <div class="card-body">
+                <form action="{{ route('water-entries.store') }}" method="POST" id="entryForm">
+                    @csrf
+                    @include('water-entries._form')
+                    <div class="mt-4 d-flex gap-2">
+                        <button type="submit" class="btn btn-primary"><i class="bi bi-save me-1"></i>সংরক্ষণ করুন</button>
+                        <a href="{{ route('water-entries.index') }}" class="btn btn-outline-secondary">বাতিল</a>
+                    </div>
+                </form>
+            </div>
+        </div>
+    </div>
+</div>
+@endsection
