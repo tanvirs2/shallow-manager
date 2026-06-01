@@ -6,6 +6,7 @@ use App\Models\Farmer;
 use App\Models\Payment;
 use App\Models\WaterEntry;
 use Carbon\Carbon;
+use Illuminate\Support\Facades\DB;
 
 class DashboardController extends Controller
 {
@@ -38,9 +39,11 @@ class DashboardController extends Controller
             ->take(5)
             ->get();
 
-        $monthlyData = WaterEntry::selectRaw("strftime('%m', supply_date) as month, SUM(total_amount) as billed")
+        $isSQLite = DB::getDriverName() === 'sqlite';
+        $monthExpr = $isSQLite ? "strftime('%m', supply_date)" : "MONTH(supply_date)";
+        $monthlyData = WaterEntry::selectRaw("$monthExpr as month, SUM(total_amount) as billed")
             ->whereYear('supply_date', now()->year)
-            ->groupByRaw("strftime('%m', supply_date)")
+            ->groupByRaw($monthExpr)
             ->pluck('billed', 'month');
 
         return view('dashboard', compact(
